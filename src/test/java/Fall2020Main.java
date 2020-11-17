@@ -7,7 +7,7 @@ public class Fall2020Main {
         MultiplayerGameRunner gameRunner = new MultiplayerGameRunner();
 
         //Choose league level
-        gameRunner.setLeagueLevel(1);
+        gameRunner.setLeagueLevel(2);
 
         //Add players
         gameRunner.addAgent(BasicAgent.class, "Kotake");
