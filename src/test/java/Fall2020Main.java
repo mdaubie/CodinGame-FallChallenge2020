@@ -11,7 +11,7 @@ public class Fall2020Main {
 
         //Add players
         gameRunner.addAgent(BasicAgent.class, "Kotake");
-        gameRunner.addAgent(BasicAgent.class, "Koume");
+        gameRunner.addAgent(Player.class, "Pakme");
 
         //Set game seed
         gameRunner.setSeed(5842184981578562716L);
