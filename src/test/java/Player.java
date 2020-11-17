@@ -119,6 +119,12 @@ class Witch implements helperInterface {
         this.actions.add(new Action("REST"));
     }
 
+    Witch(Witch witch) {
+        this.inventory = helperInterface.copyIntArray(witch.getInventory());
+        this.score = witch.getScore();
+        this.actions = helperInterface.copyActionArray(witch.getActions());
+    }
+
     public int[] getNeededIngredientsFor(Action action) {
         int[] delta = action.getDelta();
         int[] neededIngredients = new int[4];
@@ -195,6 +201,17 @@ class Action implements helperInterface {
         this.repeatable = repeatable;
     }
 
+    Action(Action action) {
+        this.actionId = action.actionId;
+        this.actionType = action.actionType;
+        this.delta = helperInterface.copyIntArray(action.getDelta());
+        this.price = action.price;
+        this.tomeIndex = action.tomeIndex;
+        this.taxCount = action.taxCount;
+        this.castable = action.castable;
+        this.repeatable = action.repeatable;
+    }
+
     public Action(int actionId, String actionType) {
         this (actionId,actionType,new int[4],0,0,0,false,false);
     }
@@ -222,10 +239,25 @@ class Action implements helperInterface {
 interface helperInterface {
     Logger LOGGER = new Logger();
 
+    static int[] copyIntArray(int[] originalArray) {
+        int length = originalArray.length;
+        int[] newArray = new int[length];
+        System.arraycopy(originalArray, 0, newArray, 0, length);
+        return newArray;
+    }
+
     static int sumIntArray(int[] intArray) {
         int sum=0;
         for (int value : intArray) { sum += value; }
         return sum;
+    }
+
+    static ArrayList<Action> copyActionArray(ArrayList<Action> originalArray) {
+        ArrayList<Action> newArray = new ArrayList<>();
+        for(Action action : originalArray) {
+            newArray.add(new Action(action));
+        }
+        return newArray;
     }
 }
 
