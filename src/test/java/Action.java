@@ -1,6 +1,6 @@
 class Action implements helperInterface {
     private final int actionId;
-    private final String actionType;
+    private String actionType;
     private final int[] delta;
     private final int price;
     private final int tomeIndex;
@@ -52,4 +52,5 @@ class Action implements helperInterface {
     public boolean isCastable() { return castable; }
     public boolean isRepeatable() { return repeatable; }
     public void setCastable(boolean castable) { this.castable = castable; }
+    public void setActionType(String actionType) { this.actionType = actionType; }
 }
