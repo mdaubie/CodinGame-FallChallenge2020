@@ -1,4 +1,5 @@
 class Logger {
+    //TODO clean logger, only returns action (actually delete the logger)
     private static final String[] typeString={"Error","Warning","Info"};
     private String message=" ";
     public String getMessage() { return message; }

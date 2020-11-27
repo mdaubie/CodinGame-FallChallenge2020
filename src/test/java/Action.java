@@ -7,6 +7,7 @@ class Action implements helperInterface {
     private final int taxCount;
     private boolean castable;
     private final boolean repeatable;
+    private final int repeatAction;
 
     Action(int actionId, String actionType, int[] delta, int price, int tomeIndex, int taxCount, boolean castable, boolean repeatable) {
         this.actionId = actionId;
@@ -17,17 +18,23 @@ class Action implements helperInterface {
         this.taxCount = taxCount;
         this.castable = castable;
         this.repeatable = repeatable;
+        this.repeatAction = 1;
     }
 
     Action(Action action) {
-        this.actionId = action.actionId;
-        this.actionType = action.actionType;
+        this(action,action.getRepeatAction());
+    }
+
+    Action(Action action, int repeatAction) {
+        this.actionId = action.getActionId();
+        this.actionType = action.getActionType();
         this.delta = helperInterface.copyIntArray(action.getDelta());
-        this.price = action.price;
-        this.tomeIndex = action.tomeIndex;
-        this.taxCount = action.taxCount;
-        this.castable = action.castable;
-        this.repeatable = action.repeatable;
+        this.price = action.getPrice();
+        this.tomeIndex = action.getTomeIndex();
+        this.taxCount = action.getTaxCount();
+        this.castable = action.isCastable();
+        this.repeatable = action.isRepeatable();
+        this.repeatAction = repeatAction;
     }
 
     public Action(int actionId, String actionType) {
@@ -40,12 +47,15 @@ class Action implements helperInterface {
 
     public String getCommand() {
         if (actionId==0) {return "REST";}
-        return actionType+" "+actionId;
+        String command = actionType+" "+actionId;
+        if (actionType.equals("CAST")&&repeatable) { command+=" "+repeatAction; }
+        return command;
+        //TODO take repeatActionCount in count -> move to another class or add it back to action by some way
     }
 
     public int getActionId() { return actionId; }
     public String getActionType() { return actionType; }
-    public int[] getDelta() { return delta; }
+    public int[] getDelta() { return helperInterface.multiplyIntArray(delta,repeatAction); }
     public int getPrice() { return price; }
     public int getTomeIndex() { return tomeIndex; }
     public int getTaxCount() { return taxCount; }
@@ -53,4 +63,5 @@ class Action implements helperInterface {
     public boolean isRepeatable() { return repeatable; }
     public void setCastable(boolean castable) { this.castable = castable; }
     public void setActionType(String actionType) { this.actionType = actionType; }
+    public int getRepeatAction() { return repeatAction; }
 }

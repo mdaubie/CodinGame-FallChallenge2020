@@ -28,16 +28,27 @@ class Witch implements helperInterface {
         return neededIngredients;
     }
 
-    public Action getSpellForIngredient(int ingredientIndex) {
-        //TODO should probably remove or improve (include ingredient number)
-        // we know have multiple spells for an ingredient
-        for (Action spell: spells) {
-            if (spell.getDelta()[ingredientIndex]>0) {
-                return spell;
-            }
+    public boolean canExecuteAction(Action action) {
+        if (action==null) { LOGGER.log(0,"gave null action");return false;}
+        boolean canExecuteAction;
+        switch (action.getActionType()) {
+            case "LEARN":
+                canExecuteAction=inventory[0]>action.getTomeIndex();
+                break;
+            case "CAST":
+                canExecuteAction = action.isCastable()&&hasIngredientsFor(action)&&hasInventorySpaceForAction(action);
+                break;
+            case "BREW":
+                canExecuteAction = hasIngredientsFor(action);
+                break;
+            case "REST":
+                canExecuteAction = canRest();
+                break;
+            default:
+                LOGGER.log(0,"Unknown actionType "+action.getActionType()+" line 243");
+                canExecuteAction = false;
         }
-        LOGGER.log(1,"Could not get action for ingredient");
-        return null;
+        return canExecuteAction;
     }
 
     public boolean canRest() {
@@ -47,31 +58,56 @@ class Witch implements helperInterface {
         return false;
     }
 
-    public void rest() {
+    public int rest() {
+        int restedSpells=0;
         for (Action spell: spells) {
-            spell.setCastable(true);
+            if (!spell.isCastable()) {
+                spell.setCastable(true);
+                restedSpells++;
+            }
         }
+        return restedSpells;
     }
 
-    public void updateInventory(int[] delta) {
+    public boolean updateInventory(int[] delta) {
+        boolean error=false;
         for (int i=0; i<delta.length;i++) {
+            if (inventory[i]<-delta[i]) {
+                error=true;
+                LOGGER.log(0,"Negative inventory slot");
+            }
             inventory[i]+=delta[i];
-            if (inventory[i]<0) { LOGGER.log(0,"Negative inventory slot");}
+
         }
+        return error;
     }
 
     public boolean hasIngredientsFor(Action action) {
         int[] delta = action.getDelta();
-        delta[0]+=action.getTaxCount();
-        for (int i=0; i<4;i++) {
-            if (inventory[i]<-delta[i]) { return false; }
-        }
+        for (int i=0; i<4;i++) { if (inventory[i]<-delta[i]) { return false; } }
         return true;
     }
 
     public boolean hasInventorySpaceForAction(Action action) {
+        //TODO check that casting a spell throws error if inventory to small
+        // this may then be deleted or reduced to sum<10
         int[] delta = action.getDelta();
         return !(helperInterface.sumIntArray(delta)+helperInterface.sumIntArray(inventory)>inventorySpace);
+    }
+
+    public Action getSpellForIngredient(int ingIndex) {
+        ArrayList<Action> possibleSpells=helperInterface.copyActionArray(spells);
+        possibleSpells.removeIf(spell->!canExecuteAction(spell)||spell.getDelta()[0]<=0);
+        Action bestSpell=null;
+        int bestSpellValue=0;
+        for (Action spell:possibleSpells) {
+            int spellValue=helperInterface.valueOfDelta(spell.getDelta());
+            if (spellValue>bestSpellValue) {
+                bestSpellValue=spellValue;
+                bestSpell=spell;
+            }
+        }
+        return bestSpell;
     }
 
     public void setInventory(int[] inventory) { this.inventory = inventory; }
